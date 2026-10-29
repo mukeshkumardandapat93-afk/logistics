@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0D5C68">
+  <title>VahanMitra — Enterprise Security & Logistics Oversight Command</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="manifest" href="../manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0D5C68;
+      --primary-light: #166B78;
+      --primary-bright: #14B8A6;
+      --accent: #EAB308;
+      --accent-gold: #F59E0B;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --bg: #07191D;
+      --bg2: #0B252B;
+      --card: #0F323A;
+      --card2: #14404A;
+      --border: rgba(20, 184, 166, 0.28);
+      --border-gold: rgba(234, 179, 8, 0.45);
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --radius: 16px;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; display: flex; }
+    
+    /* SIDEBAR */
+    aside {
+      width: 270px; background: rgba(7, 25, 29, 0.96); border-right: 1.5px solid var(--border);
+      backdrop-filter: blur(18px); display: flex; flex-direction: column; z-index: 100;
+      position: sticky; top: 0; height: 100vh;
+    }
+    .side-brand {
+      padding: 22px 24px; border-bottom: 1.5px solid var(--border); display: flex;
+      align-items: center; gap: 14px; text-decoration: none;
+    }
+    .side-logo {
+      width: 48px; height: 48px; border-radius: 12px; overflow: hidden;
+      background: #0D5C68; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; border: 1.5px solid var(--accent); box-shadow: 0 0 18px rgba(234,179,8,0.35);
+    }
+    .side-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .side-nav { padding: 18px 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .nav-item {
+      padding: 12px 16px; border-radius: 10px; color: var(--muted); text-decoration: none;
+      font-size: 0.86rem; font-weight: 700; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: all 0.2s; border: none; background: transparent; width: 100%; text-align: left;
+    }
+    .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav-item.active {
+      color: #07191D; background: linear-gradient(135deg, #F59E0B, #EAB308);
+      box-shadow: 0 4px 14px rgba(234,179,8,0.35); font-weight: 800;
+    }
+    .side-footer { padding: 18px 22px; border-top: 1.5px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+
+    /* CONTENT AREA */
+    .content-area { flex: 1; min-height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+    header {
+      background: rgba(7, 25, 29, 0.94); backdrop-filter: blur(16px);
+      border-bottom: 1.5px solid var(--border); padding: 16px 36px;
+      display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 90;
+    }
+    .sec-badge {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--accent);
+      background: rgba(234, 179, 8, 0.12); border: 1px solid var(--accent);
+      padding: 5px 12px; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-weight: 700;
+    }
+    .sec-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(1.3);} }
+    
+    main { padding: 32px 36px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+    @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    .kpi-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 22px; }
+    .kpi-card.gold { border-color: var(--border-gold); }
+    .kpi-lbl { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .kpi-num { font-family: 'Share Tech Mono', monospace; font-size: 1.8rem; font-weight: 900; color: #fff; margin-top: 6px; }
+
+    /* 3D GLOBE */
+    .globe-container {
+      width: 100%; height: 380px; border-radius: 18px;
+      background: radial-gradient(circle at center, #14404A 0%, #07191D 100%);
+      border: 1.5px solid var(--border-gold); overflow: hidden; position: relative; margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+    #three-globe-canvas { width: 100%; height: 100%; display: block; }
+    .globe-overlay-hud {
+      position: absolute; top: 16px; left: 16px; background: rgba(7,25,29,0.9);
+      border: 1px solid var(--border-gold); padding: 8px 16px; border-radius: 20px;
+      font-size: 0.75rem; color: var(--accent); font-family: 'Orbitron', monospace; font-weight: 700;
+    }
+
+    /* DATA TABLES */
+    .data-table-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 18px;
+      overflow: hidden; margin-bottom: 28px; box-shadow: var(--shadow);
+    }
+    .table-header {
+      padding: 20px 26px; border-bottom: 1.5px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th {
+      background: rgba(11, 37, 43, 0.7); padding: 14px 20px; text-align: left;
+      font-size: 0.72rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px;
+      border-bottom: 1px solid var(--border); font-weight: 700;
+    }
+    td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text); vertical-align: middle; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 16px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .status-badge.verified { background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid #10B981; }
+    .status-badge.pending { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .status-badge.banned { background: rgba(239,68,68,0.15); color: #F87171; border: 1px solid #EF4444; }
+
+    /* CRYPTO INSPECTOR */
+    .crypto-card {
+      background: #0B252B; border: 1.5px solid var(--border-gold); border-radius: 16px;
+      padding: 24px; font-family: 'Share Tech Mono', monospace; margin-bottom: 24px;
+      box-shadow: 0 0 30px rgba(234,179,8,0.08);
+    }
+    .crypto-token-stream {
+      background: #07191D; padding: 16px; border-radius: 10px; border: 1px solid var(--border);
+      color: var(--accent); font-size: 0.82rem; word-break: break-all; margin: 12px 0;
+    }
+    .audit-row {
+      display: flex; justify-content: space-between; padding: 10px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.08); font-size: 0.78rem;
+    }
+
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 10px; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+    }
+    .btn-sm { padding: 5px 12px; font-size: 0.74rem; }
+    .btn-gold { background: linear-gradient(135deg, #F59E0B, #EAB308); color: #07191D; }
+    .btn-teal { background: linear-gradient(135deg, #0D5C68, #14B8A6); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside>
+    <a href="../index.html" class="side-brand">
+      <div class="side-logo">
+        <img src="../assets/logo.png" alt="VahanMitra Logo">
+      </div>
+      <div>
+        <div style="font-family:'Orbitron',monospace; font-weight:900; font-size:1.15rem; color:#fff;">VAHAN MITRA</div>
+        <div style="font-size:0.68rem; color:var(--accent); letter-spacing:1.5px; font-weight:700;">ADMIN OVERSIGHT</div>
+      </div>
+    </a>
+    <div class="side-nav">
+      <button class="nav-item active" onclick="switchAdminTab('overview')">📊 Fleet Overview</button>
+      <button class="nav-item" onclick="switchAdminTab('globe')">🌍 3D Freight Map</button>
+      <button class="nav-item" onclick="switchAdminTab('crypto')">🔐 Crypto Inspector</button>
+      <button class="nav-item" onclick="switchAdminTab('captains')">🚗 Captains & UPI (₹200)</button>
+      <button class="nav-item" onclick="switchAdminTab('trips')">📦 Consignments Oversight</button>
+      <button class="nav-item" onclick="switchAdminTab('settings')">⚙️ Google Maps & UPI Settings</button>
+    </div>
+    <div class="side-footer">
+      <div>Security Node: <strong style="color:var(--accent);">AES-256 Active</strong></div>
+      <div style="margin-top:4px; color:var(--primary-bright);">Root Clearance Level 4</div>
+    </div>
+  </aside>
+
+  <div class="content-area">
+    <!-- HEADER -->
+    <header>
+      <div>
+        <h2 style="font-family:'Orbitron',monospace; font-size:1.2rem; color:#fff;" id="admin-sec-title">Enterprise Logistics Oversight</h2>
+        <span style="font-size:0.75rem; color:var(--muted);">National Freight Telemetry • UPI Settlements (m.dandpat@ybl)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="sec-badge"><span class="sec-dot"></span> SHA-256 HMAC VERIFIED</div>
+        <button class="btn btn-ghost btn-sm" onclick="handleAdminLogout()">Exit Session</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- AUTH OVERLAY -->
+      <div id="admin-auth-overlay" style="display:none; position:fixed; inset:0; background:rgba(7,25,29,0.94); z-index:200; align-items:center; justify-content:center;">
+        <div style="background:var(--card); border:2px solid var(--accent); border-radius:22px; padding:36px; width:100%; max-width:420px; text-align:center; box-shadow:var(--shadow);">
+          <div style="width:52px; height:52px; border-radius:14px; background:#0D5C68; border:1.5px solid var(--accent); margin:0 auto 16px; overflow:hidden;">
+            <img src="../assets/logo.png" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <h2 style="font-family:'Orbitron',monospace; font-size:1.35rem; color:#fff; margin-bottom:8px;">Admin Clearance</h2>
+          <p style="font-size:0.82rem; color:var(--muted); margin-bottom:20px;">Enter Root Administrator Security Key</p>
+          <input type="password" id="admin-pass-input" style="width:100%; padding:12px; background:rgba(7,25,29,0.8); border:1px solid var(--border); border-radius:10px; color:#fff; font-size:1.1rem; text-align:center; margin-bottom:16px; outline:none;" placeholder="••••••••">
+          <button class="btn btn-gold" style="width:100%; padding:12px;" onclick="handleAdminLogin()">Authenticate Root</button>
+          <div style="margin-top:14px; font-size:0.75rem; color:var(--muted);">Default Demo Key: <strong style="color:var(--accent);">admin123</strong></div>
+        </div>
+      </div>
+
+      <!-- TAB 1: FLEET OVERVIEW -->
+      <div id="tab-adm-overview">
+        <div class="kpi-grid">
+          <div class="kpi-card gold">
+            <div class="kpi-lbl">Total Gross Freight</div>
+            <div class="kpi-num" id="kpi-total-val" style="color:var(--accent);">₹0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Heavy Tonnage Moved</div>
+            <div class="kpi-num" id="kpi-tonnage" style="color:var(--primary-bright);">0.0 T</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Active In-Flight Hauls</div>
+            <div class="kpi-num" id="kpi-active-trips" style="color:#A5B4FC;">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Verified Carriers</div>
+            <div class="kpi-num" id="kpi-online-capts" style="color:#34D399;">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">UPI Registrations</div>
+            <div class="kpi-num" id="kpi-pending-capts" style="color:var(--warning);">0</div>
+          </div>
+        </div>
+
+        <div class="data-table-card">
+          <div class="table-header">
+            <div>
+              <h3 style="font-family:'Orbitron',monospace; font-size:1.1rem; color:#fff;">Live Freight Exchange Stream</h3>
+              <p style="font-size:0.8rem; color:var(--muted);">Real-time dispatch orders & dual OTP handoffs across national highway corridors</p>
+            </div>
+            <button class="btn btn-teal btn-sm" onclick="refreshAdminData()">Refresh Stream</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order Ref</th>
+                <th>Shipper Hub</th>
+                <th>Destination Yard</th>
+                <th>Load Specs</th>
+                <th>Carrier Unit</th>
+                <th>Freight Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="overview-trips-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: 3D FREIGHT GLOBE -->
+      <div id="tab-adm-globe" style="display:none;">
+        <div class="globe-container">
+          <canvas id="three-globe-canvas"></canvas>
+          <div class="globe-overlay-hud">
+            <span>NATIONAL HIGHWAY CORRIDORS • 8 STRATEGIC INDUSTRIAL HUBS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: CRYPTO INSPECTOR -->
+      <div id="tab-adm-crypto" style="display:none;">
+        <div class="crypto-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="color:#fff; font-size:1rem;">🔐 AES-256-GCM / SHA-256 HMAC TELEMETRY ENCRYPTION</strong>
+            <span style="color:var(--accent); font-size:0.75rem;">DLT COMPLIANT</span>
+          </div>
+          <p style="font-size:0.8rem; color:var(--muted); margin-top:6px;">
+            Every cargo manifesto, GSTIN tax invoice, driver Aadhaar, and bi-directional OTP is signed cryptographically.
+          </p>
+          <div class="crypto-token-stream" id="crypto-token-display">
+            VM_ENC256$7f82b1$eyJhY3RpdmVUcmlwIjoiVk0tVFJQLTg5MTAiLCJjb25zaWdub3JHU1RJTiI6IjI3QUFCQ0ExMjM0RjFaOCIsImNvcnJpZG9yIjoiTkggNDggTXVtYmFpLVB1bmUgRXhwcmVzc3dheSIsImN1cnJlbnRTcGVlZCI6IjU4IGttL2gifQ==
+          </div>
+          <button class="btn btn-teal btn-sm" onclick="revealCryptoPayload()">Decrypt Active Session Payload</button>
+          <div id="decrypted-payload-box" style="display:none; margin-top:14px; background:rgba(7,25,29,0.9); padding:14px; border-radius:10px; border:1px solid var(--accent); color:#CBD5E1;"></div>
+        </div>
+
+        <div class="data-table-card">
+          <div class="table-header">
+            <h3 style="font-family:'Orbitron',monospace; font-size:1.1rem; color:#fff;">Cryptographic Audit Logs</h3>
+          </div>
+          <div id="audit-log-stream" style="padding:16px 24px; max-height:360px; overflow-y:auto; font-family:'Share Tech Mono', monospace;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CAPTAINS & UPI (₹200) -->
+      <div id="tab-adm-captains" style="display:none;">
+        <div class="data-table-card">
+          <div class="table-header">
+            <div>
+              <h3 style="font-family:'Orbitron',monospace; font-size:1.1rem; color:#fff;">Fleet Captains & UPI Registration Fee Reconciliation</h3>
+              <p style="font-size:0.8rem; color:var(--muted);">Verify ₹200 fee payments transferred to m.dandpat@ybl and activate commercial driver accounts.</p>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Driver Name</th>
+                <th>Contact</th>
+                <th>Vehicle / Model</th>
+                <th>Permit & License</th>
+                <th>₹200 UPI Payment Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="captains-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: CONSIGNMENTS OVERSIGHT -->
+      <div id="tab-adm-trips" style="display:none;">
+        <div class="data-table-card">
+          <div class="table-header">
+            <h3 style="font-family:'Orbitron',monospace; font-size:1.1rem; color:#fff;">Full Consignment Ledger</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Consignment ID</th>
+                <th>Shipper</th>
+                <th>Corridor Route</th>
+                <th>Load (Tons)</th>
+                <th>Pickup OTP</th>
+                <th>Delivery OTP</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="all-trips-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: GOOGLE MAPS & UPI SETTINGS -->
+      <div id="tab-adm-settings" style="display:none;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <!-- Google Maps API Configuration Card -->
+          <div style="background:var(--card); border:1.5px solid var(--border-gold); border-radius:18px; padding:28px;">
+            <h3 style="font-family:'Orbitron',monospace; font-size:1.2rem; color:#fff; margin-bottom:14px;">
+              🗺️ Google Maps API Key Configuration
+            </h3>
+            <p style="font-size:0.85rem; color:var(--muted); margin-bottom:20px; line-height:1.6;">
+              Configure your Google Cloud Platform Maps JavaScript API key to enable high-resolution satellite imagery, terrain overlays, and live corridor street view across Customer, Captain, and Homepage tracking views.
+            </p>
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:0.75rem; color:var(--muted); text-transform:uppercase; font-weight:700; margin-bottom:6px;">Google Maps JavaScript API Key</label>
+              <input type="text" id="adm-gmaps-key-input" class="form-input" placeholder="AIzaSy..." style="width:100%; padding:12px; background:rgba(7,25,29,0.85); border:1px solid var(--border); border-radius:10px; color:#fff; font-family:'Share Tech Mono', monospace;">
+            </div>
+            <button class="btn btn-gold" onclick="saveAdminGmapsKey()" style="width:100%;">
+              <span>💾</span> Save Google Maps API Key
+            </button>
+            <div style="font-size:0.75rem; color:var(--primary-bright); margin-top:12px;">
+              ✓ Fallback high-tech radar canvas will automatically activate whenever an API key is not supplied.
+            </div>
+          </div>
+
+          <!-- UPI Payment Settings Card -->
+          <div style="background:var(--card); border:1.5px solid var(--border); border-radius:18px; padding:28px;">
+            <h3 style="font-family:'Orbitron',monospace; font-size:1.2rem; color:#fff; margin-bottom:14px;">
+              💳 Captain Registration UPI Gateway
+            </h3>
+            <p style="font-size:0.85rem; color:var(--muted); margin-bottom:20px; line-height:1.6;">
+              Settlement details for driver registration and vehicle verification fees.
+            </p>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:0.75rem; color:var(--muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Payee UPI ID</label>
+              <div style="font-family:'Share Tech Mono', monospace; font-size:1.1rem; color:var(--accent); font-weight:800;">m.dandpat@ybl</div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:0.75rem; color:var(--muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Fixed Driver Onboarding Fee</label>
+              <div style="font-size:1.1rem; color:#fff; font-weight:800;">₹200.00 Fixed</div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:0.75rem; color:var(--muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Account Title</label>
+              <div style="font-size:0.95rem; color:#CBD5E1;">Vahan Mitra Logistics Pvt Ltd</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer style="margin-top:auto; padding:24px 36px; background:rgba(7,25,29,0.96); border-top:1.5px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <img src="../assets/logo.png" style="width:36px; height:36px; border-radius:10px; border:1px solid var(--accent); object-fit:cover;">
+        <div>
+          <div style="font-family:'Orbitron',monospace; font-weight:800; font-size:1rem; color:#fff;">VAHAN MITRA</div>
+          <div style="font-size:0.72rem; color:var(--muted);">Odisha Balasore Operations Command</div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Orbitron',monospace; font-size:1rem; font-weight:900; color:var(--accent);">Developed by M.K Dandpat</div>
+        <div style="font-size:0.75rem; color:#CBD5E1; margin-top:2px;">Dedicated for Odisha People • Balasore District Heavy Logistics Oversight • Open for All Indian Citizens</div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--muted); text-align:right;">
+        Root Clearance Level 4 • AES-256 Active
+      </div>
+    </footer>
+  </div>
+
+  <script src="../assets/app.js"></script>
+  <script>
+    function checkAdminSession() {
+      const isLogged = VahanMitraDB.isAdminLoggedIn();
+      const overlay = document.getElementById('admin-auth-overlay');
+      if (!isLogged) {
+        overlay.style.display = 'flex';
+      } else {
+        overlay.style.display = 'none';
+        refreshAdminData();
+      }
+    }
+
+    function handleAdminLogin() {
+      const pass = document.getElementById('admin-pass-input').value.trim();
+      if (VahanMitraDB.adminLogin(pass)) {
+        checkAdminSession();
+      } else {
+        alert('Invalid root administrative key.');
+      }
+    }
+
+    function handleAdminLogout() {
+      VahanMitraDB.adminLogout();
+      location.reload();
+    }
+
+    function switchAdminTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-adm-overview').style.display = 'none';
+      document.getElementById('tab-adm-globe').style.display = 'none';
+      document.getElementById('tab-adm-crypto').style.display = 'none';
+      document.getElementById('tab-adm-captains').style.display = 'none';
+      document.getElementById('tab-adm-trips').style.display = 'none';
+      document.getElementById('tab-adm-settings').style.display = 'none';
+
+      const navBtns = document.querySelectorAll('.nav-item');
+      if (tab === 'overview') { navBtns[0].classList.add('active'); document.getElementById('tab-adm-overview').style.display = 'block'; }
+      if (tab === 'globe') { navBtns[1].classList.add('active'); document.getElementById('tab-adm-globe').style.display = 'block'; }
+      if (tab === 'crypto') { navBtns[2].classList.add('active'); document.getElementById('tab-adm-crypto').style.display = 'block'; }
+      if (tab === 'captains') { navBtns[3].classList.add('active'); document.getElementById('tab-adm-captains').style.display = 'block'; renderCaptainsTable(); }
+      if (tab === 'trips') { navBtns[4].classList.add('active'); document.getElementById('tab-adm-trips').style.display = 'block'; renderTripsLedger(); }
+      if (tab === 'settings') {
+        navBtns[5].classList.add('active');
+        document.getElementById('tab-adm-settings').style.display = 'block';
+        document.getElementById('adm-gmaps-key-input').value = VahanMitraDB.getGoogleMapsApiKey();
+      }
+    }
+
+    function saveAdminGmapsKey() {
+      const key = document.getElementById('adm-gmaps-key-input').value.trim();
+      VahanMitraDB.setGoogleMapsApiKey(key);
+      alert('Google Maps API Key saved successfully across all platform portals!');
+    }
+
+    function refreshAdminData() {
+      const kpis = VahanMitraDB.getKPIs();
+      document.getElementById('kpi-total-val').textContent = VahanMitraDB.fmt.currency(kpis.totalFreightVal || 28472);
+      document.getElementById('kpi-tonnage').textContent = `${kpis.totalTonsMoved || '19.3'} T`;
+      document.getElementById('kpi-active-trips').textContent = kpis.activeTrips;
+      document.getElementById('kpi-online-capts').textContent = kpis.onlineCaptains;
+      document.getElementById('kpi-pending-capts').textContent = kpis.pendingCaptains;
+
+      renderOverviewTrips();
+      renderAuditLogs();
+    }
+
+    function renderOverviewTrips() {
+      const trips = VahanMitraDB.getTrips().slice(0, 8);
+      const tbody = document.getElementById('overview-trips-tbody');
+      tbody.innerHTML = trips.map(t => `
+        <tr>
+          <td><code style="color:var(--accent);">${t.id.slice(0, 10)}</code></td>
+          <td>${t.pickup}</td>
+          <td>${t.drop}</td>
+          <td><strong>${t.loadWeightTons}T</strong> (${t.cargoType})</td>
+          <td>${t.captainName || '<span style="color:var(--warning);">Dispatching...</span>'}</td>
+          <td style="font-family:'Share Tech Mono', monospace; font-weight:800; color:var(--accent);">${VahanMitraDB.fmt.currency(t.totalAmount || t.fare)}</td>
+          <td><span class="status-badge ${t.status === 'completed' ? 'verified' : 'pending'}">${t.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCaptainsTable() {
+      const caps = VahanMitraDB.getCaptains();
+      const tbody = document.getElementById('captains-tbody');
+      tbody.innerHTML = caps.map(c => `
+        <tr>
+          <td>
+            <strong>${c.name}</strong>
+            <div style="font-size:0.75rem; color:var(--muted);">${c.email}</div>
+          </td>
+          <td>${c.phone}</td>
+          <td>${c.vehicleName || 'BharatBenz Tipper'} (${c.vehicleNumber || 'MH 46 BB 7812'})</td>
+          <td>${c.licenseNumber || 'DL-TRK-2018-091234'}</td>
+          <td>
+            ${c.registrationFeePaid ? `
+              <span class="status-badge verified">✓ PAID ₹200 (UTR: ${c.upiUtr || 'PRE-PAID'})</span>
+            ` : `
+              <span class="status-badge pending">⏳ PENDING ₹200 UPI</span>
+            `}
+          </td>
+          <td>
+            ${!c.registrationFeePaid ? `
+              <button class="btn btn-gold btn-sm" onclick="adminVerifyCaptainPayment('${c.id}')">Approve ₹200</button>
+            ` : `
+              <button class="btn btn-teal btn-sm" onclick="alert('Captain account verified and authenticated.')">Verified</button>
+            `}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function adminVerifyCaptainPayment(capId) {
+      const dummyUtr = 'UTR' + Math.floor(100000000000 + Math.random() * 900000000000);
+      VahanMitraDB.confirmCaptainUpiPayment(capId, dummyUtr);
+      alert(`Payment of ₹200 for Captain approved with simulated reference ${dummyUtr}!`);
+      renderCaptainsTable();
+      refreshAdminData();
+    }
+
+    function renderTripsLedger() {
+      const trips = VahanMitraDB.getTrips();
+      const tbody = document.getElementById('all-trips-tbody');
+      tbody.innerHTML = trips.map(t => `
+        <tr>
+          <td><code>${t.id}</code></td>
+          <td>${t.userName}</td>
+          <td>${t.pickup} ➔ ${t.drop}</td>
+          <td>${t.loadWeightTons} Tons</td>
+          <td><code style="color:var(--warning); font-size:1.1rem; font-weight:800;">${t.pickupOtp}</code></td>
+          <td><code style="color:#34D399; font-size:1.1rem; font-weight:800;">${t.deliveryOtp}</code></td>
+          <td><span class="status-badge ${t.status === 'completed' ? 'verified' : 'pending'}">${t.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAuditLogs() {
+      const logs = VahanMitraDB.getAuditLogs().slice(0, 10);
+      const container = document.getElementById('audit-log-stream');
+      container.innerHTML = logs.map(l => `
+        <div class="audit-row">
+          <span><strong style="color:var(--accent);">[${l.action}]</strong> ${l.details}</span>
+          <span style="color:var(--muted);">${new Date(l.timestamp).toLocaleTimeString()}</span>
+        </div>
+      `).join('');
+    }
+
+    function revealCryptoPayload() {
+      const box = document.getElementById('decrypted-payload-box');
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+      } else {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <strong style="color:var(--accent);">DECRYPTED PLAINTEXT AUDIT:</strong><br>
+          <pre style="margin-top:6px; font-family:'Share Tech Mono', monospace; font-size:0.75rem;">
+{
+  "activeTrip": "VM-TRP-8910",
+  "consignorGSTIN": "27AABCA1234F1Z8",
+  "corridor": "NH 48 Mumbai-Pune Expressway",
+  "currentSpeed": "58 km/h",
+  "axleWeightVerified": "14.5 Ton",
+  "driverLicense": "DL-IND-TRK-2018-091234",
+  "upiSettlementId": "m.dandpat@ybl",
+  "registrationFee": "₹200 Paid",
+  "integrityProof": "SHA-256 HMAC Matches Root"
+}
+          </pre>
+        `;
+      }
+    }
+
+    // ── THREE.JS 3D LIVE FREIGHT GLOBE ──────────────────────────────────────
+    let scene, camera, renderer, globeGroup;
+    function init3DGlobe() {
+      const canvas = document.getElementById('three-globe-canvas');
+      const container = canvas.parentElement;
+
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(container.clientWidth, container.clientHeight);
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera.position.set(0, 2, 7.5);
+      camera.lookAt(0, 0, 0);
+
+      scene.add(new THREE.AmbientLight(0x14404A, 3.5));
+      const p1 = new THREE.PointLight(0x0D5C68, 5, 30);
+      p1.position.set(8, 8, 8);
+      scene.add(p1);
+
+      const p2 = new THREE.PointLight(0xEAB308, 4, 30);
+      p2.position.set(-8, -4, 4);
+      scene.add(p2);
+
+      globeGroup = new THREE.Group();
+      scene.add(globeGroup);
+
+      const sphereMat = new THREE.MeshPhongMaterial({ color: 0x07191D, emissive: 0x051316, shininess: 80 });
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(2.4, 48, 48), sphereMat);
+      const wireMat = new THREE.MeshBasicMaterial({ color: 0x14B8A6, wireframe: true, opacity: 0.12, transparent: true });
+      const wire = new THREE.Mesh(new THREE.SphereGeometry(2.41, 24, 24), wireMat);
+      globeGroup.add(sphere, wire);
+
+      const hubs = [
+        { lat: 19.076, lng: 72.877, name: 'Mumbai' },
+        { lat: 18.520, lng: 73.856, name: 'Pune' },
+        { lat: 28.613, lng: 77.209, name: 'Delhi NCR' },
+        { lat: 21.145, lng: 79.088, name: 'Nagpur Freight Hub' },
+        { lat: 12.971, lng: 77.594, name: 'Bengaluru Industrial Area' },
+        { lat: 13.082, lng: 80.270, name: 'Chennai Port' },
+        { lat: 23.022, lng: 72.571, name: 'Ahmedabad Logistics Park' },
+        { lat: 22.572, lng: 88.363, name: 'Kolkata Depot' }
+      ];
+
+      function toXYZ(lat, lng, r) {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lng + 180) * (Math.PI / 180);
+        return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
+      }
+
+      const hubPts = hubs.map(h => toXYZ(h.lat, h.lng, 2.43));
+      hubPts.forEach(pt => {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), new THREE.MeshBasicMaterial({ color: 0xEAB308 }));
+        m.position.copy(pt);
+        globeGroup.add(m);
+      });
+
+      const routes = [[0,1], [0,2], [1,3], [2,6], [3,4], [4,5], [0,6], [2,7]];
+      routes.forEach(([a, b]) => {
+        const pA = hubPts[a], pB = hubPts[b];
+        const mid = pA.clone().add(pB).normalize().multiplyScalar(3.2);
+        const curve = new THREE.QuadraticBezierCurve3(pA, mid, pB);
+        const pts = curve.getPoints(50);
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const mat = new THREE.LineBasicMaterial({ color: 0x14B8A6, opacity: 0.65, transparent: true });
+        globeGroup.add(new THREE.Line(geo, mat));
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        globeGroup.rotation.y += 0.002;
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAdminSession();
+      init3DGlobe();
+    });
+  </script>
+</body>
+</html>

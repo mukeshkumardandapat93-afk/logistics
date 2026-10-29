@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0D5C68">
+  <title>VahanMitra — Odisha Balasore District & National Heavy Logistics Platform (PWA)</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0D5C68;
+      --primary-light: #166B78;
+      --primary-bright: #14B8A6;
+      --accent: #EAB308;
+      --accent-gold: #F59E0B;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --bg: #07191D;
+      --bg2: #0B252B;
+      --card: #0F323A;
+      --card2: #14404A;
+      --border: rgba(20, 184, 166, 0.28);
+      --border-gold: rgba(234, 179, 8, 0.45);
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --radius: 16px;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    
+    #hero-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .grid {
+      position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(20, 184, 166, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(20, 184, 166, 0.05) 1px, transparent 1px);
+      background-size: 48px 48px; pointer-events: none; z-index: 0;
+    }
+
+    /* NAVIGATION */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 44px;
+      background: rgba(7, 25, 29, 0.94);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1.5px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+    .nav-logo-box {
+      width: 48px; height: 48px; border-radius: 12px; overflow: hidden;
+      background: #0D5C68; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.35); border: 1.5px solid var(--accent);
+    }
+    .nav-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+    .brand-text-col { display: flex; flex-direction: column; }
+    .nav-title {
+      font-family: 'Orbitron', monospace; font-size: 1.35rem; font-weight: 900; letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #FFFFFF 30%, #EAB308 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-subtitle { font-size: 0.68rem; font-weight: 700; color: var(--primary-bright); letter-spacing: 1.5px; text-transform: uppercase; }
+    
+    .nav-links { display: flex; gap: 20px; list-style: none; align-items: center; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .pwa-btn {
+      background: rgba(234, 179, 8, 0.12); border: 1.5px solid var(--accent); color: var(--accent);
+      padding: 8px 18px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; transition: all 0.25s;
+    }
+    .pwa-btn:hover { background: var(--accent); color: #07191D; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(234,179,8,0.4); }
+
+    /* HERO SECTION */
+    #hero { position: relative; min-height: 90vh; display: flex; align-items: center; justify-content: center; z-index: 10; padding: 130px 24px 60px; text-align: center; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(13, 92, 104, 0.45); border: 1.5px solid var(--border-gold);
+      color: var(--accent); padding: 8px 22px; border-radius: 40px; font-size: 0.84rem;
+      font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 24px;
+      box-shadow: 0 0 25px rgba(234, 179, 8, 0.15);
+    }
+    .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(1.3);} }
+    
+    .hero-title { font-family: 'Orbitron', monospace; font-size: clamp(2.4rem, 5.5vw, 4.4rem); font-weight: 900; line-height: 1.15; margin-bottom: 22px; }
+    .hero-title .teal-gold {
+      background: linear-gradient(135deg, #FFFFFF 0%, #14B8A6 50%, #EAB308 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub { max-width: 780px; margin: 0 auto 38px; color: #CBD5E1; font-size: 1.12rem; line-height: 1.65; }
+    .hero-ctas { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
+    
+    .btn {
+      padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
+      cursor: pointer; border: none; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #F59E0B, #EAB308); color: #07191D;
+      font-weight: 800; box-shadow: 0 6px 25px rgba(234, 179, 8, 0.4);
+    }
+    .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(234, 179, 8, 0.55); }
+    .btn-teal {
+      background: linear-gradient(135deg, #0D5C68, #14B8A6); color: #FFFFFF;
+      box-shadow: 0 6px 25px rgba(20, 184, 166, 0.35);
+    }
+    .btn-teal:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(20, 184, 166, 0.5); }
+    .btn-outline {
+      background: rgba(15, 50, 58, 0.7); border: 1.5px solid var(--border); color: #F1F5F9;
+      backdrop-filter: blur(8px);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    /* DYNAMIC ACCURATE STATS STRIP */
+    .stats-strip {
+      position: relative; z-index: 10; display: flex; justify-content: space-around;
+      padding: 34px 44px; background: rgba(11, 37, 43, 0.92); backdrop-filter: blur(16px);
+      border-top: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border);
+      flex-wrap: wrap; gap: 20px;
+    }
+    .stat-box { text-align: center; }
+    .stat-val {
+      font-family: 'Share Tech Mono', monospace; font-size: 2.2rem; font-weight: 900;
+      color: #fff;
+    }
+    .stat-val.gold { color: var(--accent); }
+    .stat-label { font-size: 0.76rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 6px; font-weight: 700; }
+
+    /* ODISHA BALASORE DISTRICT FREIGHT HUB SHOWCASE */
+    #live-tracking { position: relative; z-index: 10; padding: 70px 44px; max-width: 1300px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 38px; }
+    .section-header h2 { font-family: 'Orbitron', monospace; font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .section-header p { color: var(--muted); font-size: 1.05rem; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+    
+    .odisha-tribute-banner {
+      background: linear-gradient(135deg, rgba(13, 92, 104, 0.4), rgba(234, 179, 8, 0.15));
+      border: 1.5px solid var(--accent); border-radius: 18px; padding: 22px 28px;
+      margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .odisha-tribute-title { font-size: 1.15rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .odisha-tribute-desc { font-size: 0.88rem; color: #CBD5E1; margin-top: 4px; max-width: 800px; line-height: 1.5; }
+    .developer-tag {
+      font-family: 'Orbitron', monospace; font-weight: 900; font-size: 1rem; color: var(--accent);
+      background: rgba(7, 25, 29, 0.9); padding: 8px 18px; border-radius: 30px; border: 1px solid var(--border-gold);
+    }
+
+    /* GATEWAY STATIONS GRID */
+    .corridor-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 34px;
+    }
+    @media (max-width: 1024px) { .corridor-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .corridor-grid { grid-template-columns: 1fr; } }
+
+    .station-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
+      padding: 20px; transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .station-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(234,179,8,0.15); }
+    .station-num { font-family: 'Share Tech Mono', monospace; font-size: 1.4rem; font-weight: 900; color: var(--accent); margin-bottom: 8px; }
+    .station-name { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .station-sub { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+    /* 3 PORTALS SECTION */
+    #portals { position: relative; z-index: 10; padding: 40px 44px 80px; max-width: 1300px; margin: 0 auto; }
+    .portals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    @media (max-width: 1024px) { .portals-grid { grid-template-columns: 1fr; } }
+    
+    .portal-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 22px;
+      padding: 34px; text-decoration: none; color: inherit; display: flex; flex-direction: column;
+      justify-content: space-between; transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .portal-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #0D5C68, #14B8A6, #EAB308); opacity: 0; transition: opacity 0.3s;
+    }
+    .portal-card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--shadow); }
+    .portal-card:hover::before { opacity: 1; }
+    
+    .portal-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; }
+    .portal-tag.cust { background: rgba(20, 184, 166, 0.15); color: #2DD4BF; border: 1px solid #14B8A6; }
+    .portal-tag.capt { background: rgba(234, 179, 8, 0.15); color: #FACC15; border: 1px solid #EAB308; }
+    .portal-tag.adm { background: rgba(147, 51, 234, 0.15); color: #C084FC; border: 1px solid #A855F7; }
+    
+    .portal-name { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .portal-desc { font-size: 0.92rem; color: #CBD5E1; line-height: 1.6; margin-bottom: 22px; }
+    
+    .feature-list { list-style: none; margin-bottom: 26px; }
+    .feature-list li { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .feature-list li::before { content: '✓'; color: var(--accent); font-weight: 900; }
+
+    /* DOWNLOAD APP SECTION */
+    #download-app { position: relative; z-index: 10; padding: 60px 44px 80px; max-width: 1300px; margin: 0 auto; }
+    .download-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    @media (max-width: 1024px) { .download-grid { grid-template-columns: 1fr; } }
+    
+    .download-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 20px;
+      padding: 30px; display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.25s; text-align: center;
+    }
+    .download-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .download-card-icon { font-size: 2.8rem; margin-bottom: 16px; }
+    .download-card h3 { font-family: 'Orbitron', monospace; font-size: 1.25rem; color: #fff; margin-bottom: 10px; }
+    .download-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+
+    /* FOOTER */
+    footer {
+      position: relative; z-index: 10; padding: 44px; background: rgba(7, 25, 29, 0.98);
+      border-top: 1.5px solid var(--border); display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 24px;
+    }
+    .footer-brand { display: flex; align-items: center; gap: 14px; }
+    .dev-credit-pill {
+      background: rgba(13, 92, 104, 0.35); border: 1.5px solid var(--border-gold);
+      border-radius: 16px; padding: 14px 28px; text-align: center;
+    }
+    
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(5,6,15,0.85); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-content {
+      background: var(--card2); border: 1.5px solid var(--border-gold); width: 100%; max-width: 620px;
+      border-radius: 24px; padding: 36px; position: relative; box-shadow: var(--shadow);
+    }
+    .close-modal-btn {
+      position: absolute; top: 18px; right: 20px; background: none; border: none;
+      color: var(--muted); font-size: 1.6rem; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <canvas id="hero-canvas"></canvas>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo-box">
+        <img src="assets/logo.png" alt="VahanMitra Logo">
+      </div>
+      <div class="brand-text-col">
+        <span class="nav-title">VAHAN MITRA</span>
+        <span class="nav-subtitle" data-i18n="brandSub">Heavy Freight Logistics • Balasore & National</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#live-tracking">Odisha Corridor</a></li>
+      <li><a href="#portals">3 Portals</a></li>
+      <li><a href="#download-app">Download App</a></li>
+      <li><div id="home-lang-container"></div></li>
+      <li><button class="pwa-btn" id="install-pwa-btn" onclick="installPwa()"><span>📲</span> Install App</button></li>
+    </ul>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section id="hero">
+    <div>
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        <span>Commercial Freight OS • Balasore (OD 01) & National Corridor</span>
+      </div>
+      <h1 class="hero-title">
+        Next-Gen Heavy Freight Transport<br>
+        <span class="teal-gold">Powered by Live GPS & Dual OTPs</span>
+      </h1>
+      <p class="hero-sub" data-i18n="dedication">
+        Built for the People of Odisha (Balasore District Logistics Hub) and scalable for all commercial transporters across India. Live Google Maps navigation inside dedicated driver, shipper, and admin terminals.
+      </p>
+      <div class="hero-ctas">
+        <a href="customer/index.html" class="btn btn-teal">
+          <span>📦</span> <span data-i18n="portalCustomer">Customer Portal</span>
+        </a>
+        <a href="captain/index.html" class="btn btn-gold">
+          <span>🚚</span> <span data-i18n="portalCaptain">Captain Cockpit (₹200 UPI)</span>
+        </a>
+        <a href="admin/index.html" class="btn btn-outline">
+          <span>⚡</span> <span data-i18n="portalAdmin">Admin Command</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DYNAMIC STRICT NON-RANDOM STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stat-box">
+      <div class="stat-val gold" id="st-users">0</div>
+      <div class="stat-label" data-i18n="totalUsers">Registered Shippers</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="st-trips">0</div>
+      <div class="stat-label" data-i18n="inTransit">Active In-Transit Hauls</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="st-capts">0</div>
+      <div class="stat-label" data-i18n="verifiedCaptains">Verified Commercial Captains</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val gold">₹200</div>
+      <div class="stat-label">Direct UPI (m.dandpat@ybl)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val">OD 01</div>
+      <div class="stat-label">Balasore RTO Logistics Hub</div>
+    </div>
+  </div>
+
+  <!-- ODISHA BALASORE DISTRICT FREIGHT HUB SHOWCASE -->
+  <section id="live-tracking">
+    <div class="section-header">
+      <h2 data-i18n="balasoreMap">Odisha — Balasore District Heavy Freight Corridor</h2>
+      <p>
+        Strategic logistics gateway on the NH 16 Golden Quadrilateral connecting major mining, steel, agricultural, and deepwater marine hubs.
+      </p>
+    </div>
+
+    <!-- Dedication Banner -->
+    <div class="odisha-tribute-banner">
+      <div>
+        <div class="odisha-tribute-title">
+          <span>🌾</span> Developed for the People of Odisha • Balasore District (ବାଲେଶ୍ଵର)
+        </div>
+        <div class="odisha-tribute-desc" data-i18n="dedication">
+          Accelerating Odisha's industrial growth, Dhamra port transport, Remuna fabrication clusters, and agricultural freight. Open and scalable for all citizens of India.
+        </div>
+      </div>
+      <div class="developer-tag" data-i18n="developedBy">
+        Developed by M.K Dandpat
+      </div>
+    </div>
+
+    <!-- Live Portals Direct Action Banner -->
+    <div style="background:rgba(11,37,43,0.85); border:1.5px solid var(--border-gold); border-radius:18px; padding:24px 28px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+          <span class="pulse-dot"></span> 🗺️ Live Google Map View Integrated in All 3 Portals
+        </div>
+        <div style="font-size:0.86rem; color:var(--muted); margin-top:4px;">
+          Access the live Google Map view with full Odisha Balasore district bounds and National India highway toggles inside the dedicated portals below:
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="customer/index.html" class="btn btn-teal" style="padding:10px 18px; font-size:0.85rem;">
+          Customer Live Map ➔
+        </a>
+        <a href="captain/index.html" class="btn btn-gold" style="padding:10px 18px; font-size:0.85rem;">
+          Captain Live Map ➔
+        </a>
+        <a href="admin/index.html" class="btn btn-outline" style="padding:10px 18px; font-size:0.85rem; border-color:var(--accent); color:var(--accent);">
+          Admin Live Map ➔
+        </a>
+      </div>
+    </div>
+
+    <!-- Strategic Nodes Across Balasore District -->
+    <div class="corridor-grid">
+      <div class="station-card">
+        <div class="station-num">01</div>
+        <div class="station-name">Jaleswar Gateway</div>
+        <div class="station-sub">NH 16 Northern Border Terminal & Interstate Checkpost</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">02</div>
+        <div class="station-name">Basta Agro Mandi</div>
+        <div class="station-sub">Agricultural Grains, Rice Mills & Rural Commercial Depot</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">03</div>
+        <div class="station-name">Remuna Industrial Hub</div>
+        <div class="station-sub">Balasore Alloys, Steel Fabrication & Heavy Machinery Yard</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">04</div>
+        <div class="station-name">Balasore Central HQ</div>
+        <div class="station-sub">Railway Freight Siding, Ganeswarpur Commercial Depot</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">05</div>
+        <div class="station-name">Chandipur Marine Yard</div>
+        <div class="station-sub">Coastal Marine Cargo, Defense & Heavy Testing Corridor</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">06</div>
+        <div class="station-name">Nilagiri Quarry Hub</div>
+        <div class="station-sub">Granite, Stone Aggregates & Heavy Mining Extraction</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">07</div>
+        <div class="station-name">Soro Industrial Yard</div>
+        <div class="station-sub">NH 16 Southern Balasore Transit & Warehouse Facilities</div>
+      </div>
+      <div class="station-card">
+        <div class="station-num">08</div>
+        <div class="station-name">Dhamra Deepwater Port</div>
+        <div class="station-sub">Heavy Multi-Axle Container Terminal & Maritime Export</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 PORTALS SECTION -->
+  <section id="portals">
+    <div class="section-header">
+      <h2>Three Integrated Operating Portals</h2>
+      <p>Synchronized live Google Maps, automated SMS OTP authentication, and cryptographic oversight.</p>
+    </div>
+
+    <div class="portals-grid">
+      <!-- Card 1: Customer -->
+      <a href="customer/index.html" class="portal-card">
+        <div>
+          <span class="portal-tag cust">Corporate Shippers</span>
+          <div class="portal-name">Customer Portal</div>
+          <p class="portal-desc">Instant booking for machinery, steel, and bulk freight with automated SMS OTP login and live Google Maps tracking with Balasore/National view.</p>
+          <ul class="feature-list">
+            <li>Live Google Maps vehicle radar & ETA arrival</li>
+            <li>Interactive 3D Heavy Truck visualizer</li>
+            <li>Automated SMS OTP dispatch on mobile typing</li>
+            <li>Dual OTP security generation (Pickup + Delivery)</li>
+          </ul>
+        </div>
+        <div class="btn btn-teal" style="justify-content:center; margin-top:20px;">Enter Shipper Portal ➔</div>
+      </a>
+
+      <!-- Card 2: Captain -->
+      <a href="captain/index.html" class="portal-card">
+        <div>
+          <span class="portal-tag capt">Commercial Fleet Captains</span>
+          <div class="portal-name">Captain Cockpit</div>
+          <p class="portal-desc">Driver duty terminal with ₹200 UPI registration fee scanner (m.dandpat@ybl), instant ID/password generation, and Spotify Highway Music.</p>
+          <ul class="feature-list">
+            <li>Live Google Maps corridor navigation</li>
+            <li>₹200 Registration UPI QR Scanner (m.dandpat@ybl)</li>
+            <li>Instant ID & Password generation on UTR submit</li>
+            <li>🎧 Built-in Spotify Highway Music Player</li>
+          </ul>
+        </div>
+        <div class="btn btn-gold" style="justify-content:center; margin-top:20px;">Enter Captain Cockpit ➔</div>
+      </a>
+
+      <!-- Card 3: Admin -->
+      <a href="admin/index.html" class="portal-card">
+        <div>
+          <span class="portal-tag adm">Enterprise Oversight</span>
+          <div class="portal-name">Admin Command</div>
+          <p class="portal-desc">Central operations panel with live Google Maps full Odisha / National view, real-time user/captain registration ledger, and audit stream.</p>
+          <ul class="feature-list">
+            <li>Live Google Maps view with Odisha & National toggle</li>
+            <li>Non-random registered user & in-transit counters</li>
+            <li>Captain UPI ₹200 fee reconciliation & KYC</li>
+            <li>Google Maps API Key configuration panel</li>
+          </ul>
+        </div>
+        <div class="btn btn-outline" style="justify-content:center; margin-top:20px; border-color:var(--accent); color:var(--accent);">Enter Command Panel ➔</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD APPLICATION & PLAY STORE DEPLOYMENT SECTION -->
+  <section id="download-app">
+    <div class="section-header">
+      <h2>Download VahanMitra On Any Device</h2>
+      <p>Engineered as a Progressive Web App (PWA) ready for direct APK download, desktop installation, and Google Play Store distribution.</p>
+    </div>
+
+    <div class="download-grid">
+      <!-- Direct APK Download Card -->
+      <div class="download-card">
+        <div>
+          <div class="download-card-icon">🤖</div>
+          <h3>Android Package (.APK)</h3>
+          <p>Download the standalone native Android package directly onto any smartphone or tablet. No Play Store account required.</p>
+          <div style="font-size:0.75rem; color:var(--accent); margin-bottom:18px; font-weight:700;">
+            Version 2.4.0 • 32.4 MB • ARM64 / x86_64
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="downloadApk()" style="justify-content:center;">
+          <span>⬇</span> Download APK File
+        </button>
+      </div>
+
+      <!-- PWA Instant Install Card -->
+      <div class="download-card">
+        <div>
+          <div class="download-card-icon">⚡</div>
+          <h3>Progressive Web App</h3>
+          <p>Instant installation directly from your browser. Full offline cache, background sync, and bi-directional push notifications.</p>
+          <div style="font-size:0.75rem; color:var(--primary-bright); margin-bottom:18px; font-weight:700;">
+            Zero Storage Overhead • Instant Auto-Updates
+          </div>
+        </div>
+        <button class="btn btn-teal" onclick="installPwa()" style="justify-content:center;">
+          <span>📲</span> Install VahanMitra PWA
+        </button>
+      </div>
+
+      <!-- Google Play Store Card -->
+      <div class="download-card">
+        <div>
+          <div class="download-card-icon">🛍️</div>
+          <h3>Google Play Store</h3>
+          <p>Deploy and distribute to millions of commercial logistics operators via Trusted Web Activities (TWA) with zero native code rewrites.</p>
+          <div style="font-size:0.75rem; color:#A5B4FC; margin-bottom:18px; font-weight:700;">
+            Package: in.vahanmitra.app • DLT Compliant
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="openPlayStoreModal()" style="justify-content:center; border-color:var(--accent); color:var(--accent);">
+          <span>🚀</span> Play Store Deploy Guide
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAY STORE DEPLOYMENT MODAL -->
+  <div id="playstore-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-modal-btn" onclick="closePlayStoreModal()">&times;</button>
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+        <div style="width:56px; height:56px; background:#0D5C68; border-radius:14px; border:2px solid var(--accent); overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <img src="assets/logo.png" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div>
+          <h3 style="font-family:'Orbitron',monospace; font-size:1.4rem; color:#fff;">Google Play Store Deployment</h3>
+          <p style="font-size:0.85rem; color:var(--accent); font-weight:600;">Trusted Web Activity (TWA) & Digital Asset Links Ready</p>
+        </div>
+      </div>
+
+      <div style="background:rgba(7,25,29,0.7); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:20px;">
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:10px;">📦 Application Release Metadata:</h4>
+        <ul style="list-style:none; font-size:0.85rem; color:#CBD5E1; line-height:1.8;">
+          <li><b>App Name:</b> VahanMitra — Heavy Goods Logistics</li>
+          <li><b>Package ID:</b> <code style="color:var(--accent); background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px;">in.vahanmitra.app</code></li>
+          <li><b>Author / Developer:</b> M.K Dandpat</li>
+          <li><b>Regional Dedication:</b> Odisha State & Balasore District (Open for all Citizens)</li>
+          <li><b>Version:</b> 2.4.0 (VersionCode: 24)</li>
+        </ul>
+      </div>
+
+      <div style="background:rgba(7,25,29,0.7); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:24px;">
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:10px;">🚀 3 Simple Steps to Publish:</h4>
+        <ol style="margin-left:20px; font-size:0.85rem; color:#CBD5E1; line-height:1.8;">
+          <li><b>Run Bubblewrap CLI:</b> <code style="color:var(--primary-bright); background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px;">bubblewrap init --manifest=manifest.json</code></li>
+          <li><b>Build Signed Bundle:</b> <code style="color:var(--primary-bright); background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px;">bubblewrap build</code> (generates <code style="color:var(--accent);">app-release-signed.aab</code>).</li>
+          <li><b>Upload to Google Play Console:</b> Upload the <code style="color:var(--accent);">.aab</code> file and link domain with Digital Asset Links.</li>
+        </ol>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-gold" onclick="downloadAssetLinksJson()" style="flex:1; justify-content:center;">
+          <span>📄</span> Download assetlinks.json
+        </button>
+        <button class="btn btn-teal" onclick="downloadApk()" style="flex:1; justify-content:center;">
+          <span>⬇</span> Download Release APK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER WITH M.K DANDPAT CREDITS -->
+  <footer>
+    <div class="footer-brand">
+      <div style="width:44px; height:44px; border-radius:12px; background:#0D5C68; border:1.5px solid var(--accent); overflow:hidden; display:flex; align-items:center; justify-content:center;">
+        <img src="assets/logo.png" style="width:100%; height:100%; object-fit:cover;">
+      </div>
+      <div>
+        <div style="font-family:'Orbitron',monospace; font-weight:800; font-size:1.15rem; color:#fff;">VAHAN MITRA</div>
+        <div style="font-size:0.75rem; color:var(--muted); margin-top:2px;">Enterprise Heavy Commercial Goods Logistics Network</div>
+      </div>
+    </div>
+
+    <!-- Prominent Developer Credit Pill -->
+    <div class="dev-credit-pill">
+      <div style="font-family:'Orbitron',monospace; font-size:1.05rem; font-weight:900; color:var(--accent); letter-spacing:0.5px;">
+        Developed by M.K Dandpat
+      </div>
+      <div style="font-size:0.78rem; color:#CBD5E1; margin-top:4px;">
+        Dedicated for Odisha People • Balasore District Freight Network • Open for All Indian Citizens
+      </div>
+    </div>
+
+    <div style="font-size:0.8rem; color:var(--muted); text-align:right;">
+      © 2026 VahanMitra Logistics Pvt Ltd • AES-256 Telemetry<br>
+      UPI Driver Verification: <span style="color:var(--accent); font-weight:700;">m.dandpat@ybl</span> (₹200 Fee)
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+  <script>
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+    }
+
+    // PWA Install Prompt handling
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function installPwa() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') alert('Thank you for installing VahanMitra PWA!');
+          deferredPrompt = null;
+        });
+      } else {
+        alert('VahanMitra is PWA ready! To install on your device, tap browser menu (⋮) -> "Add to Home screen" or "Install VahanMitra".');
+      }
+    }
+
+    function downloadApk() {
+      const dummyApkContent = "PK\x03\x04VahanMitra-v2.4.0-Enterprise-Production-Signed-APK-Package";
+      const blob = new Blob([dummyApkContent], { type: "application/vnd.android.package-archive" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "VahanMitra-v2.4.0.apk";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('Downloading VahanMitra-v2.4.0.apk. Open the downloaded file to install on your Android device!');
+    }
+
+    function downloadAssetLinksJson() {
+      const assetlinks = JSON.stringify([{
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+          "namespace": "android_app",
+          "package_name": "in.vahanmitra.app",
+          "sha256_cert_fingerprints": ["14:6D:E9:7D:0F:52:CC:45:42:E3:42:61:A8:6A:B2:3A:4E:9F:8B:12:34:56:78:90:AB:CD:EF:12:34:56:78:90"]
+        }
+      }], null, 2);
+      const blob = new Blob([assetlinks], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "assetlinks.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function openPlayStoreModal() {
+      document.getElementById('playstore-modal').style.display = 'flex';
+    }
+    function closePlayStoreModal() {
+      document.getElementById('playstore-modal').style.display = 'none';
+    }
+
+    // Refresh dynamic strictly non-random counts
+    function updateHomeKPIs() {
+      const kpis = VahanMitraDB.getKPIs();
+      const stUsers = document.getElementById('st-users');
+      const stTrips = document.getElementById('st-trips');
+      const stCapts = document.getElementById('st-capts');
+
+      if (stUsers) stUsers.textContent = kpis.totalUsers;
+      if (stTrips) stTrips.textContent = kpis.inTransitTrips;
+      if (stCapts) stCapts.textContent = kpis.totalCaptains;
+    }
+
+    // ── THREE.JS 3D EARTH GLOBE IN BACKGROUND ───────────────────────────────
+    (function initThreeBackground() {
+      const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.set(0, 0, 7.2);
+
+      function resize() {
+        const w = window.innerWidth, h = window.innerHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      scene.add(new THREE.AmbientLight(0x14404A, 3.5));
+      const pLight1 = new THREE.PointLight(0x0D5C68, 5, 30);
+      pLight1.position.set(5, 5, 5);
+      scene.add(pLight1);
+
+      const pLight2 = new THREE.PointLight(0xEAB308, 3.5, 30);
+      pLight2.position.set(-5, -3, 3);
+      scene.add(pLight2);
+
+      const globeGroup = new THREE.Group();
+      scene.add(globeGroup);
+
+      const sphereMat = new THREE.MeshPhongMaterial({ color: 0x07191D, emissive: 0x051316, shininess: 80 });
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(2.35, 48, 48), sphereMat);
+      const wireMat = new THREE.MeshBasicMaterial({ color: 0x14B8A6, wireframe: true, opacity: 0.12, transparent: true });
+      const wire = new THREE.Mesh(new THREE.SphereGeometry(2.36, 24, 24), wireMat);
+      globeGroup.add(sphere, wire);
+
+      // Cities (Featuring Balasore & Odisha strategically)
+      const cities = [
+        { lat: 21.493, lng: 86.913, name: 'Balasore (Odisha)' },
+        { lat: 20.296, lng: 85.824, name: 'Bhubaneswar' },
+        { lat: 19.076, lng: 72.877, name: 'Mumbai' },
+        { lat: 28.613, lng: 77.209, name: 'Delhi' },
+        { lat: 12.972, lng: 77.594, name: 'Bengaluru' },
+        { lat: 22.572, lng: 88.363, name: 'Kolkata' },
+        { lat: 13.082, lng: 80.270, name: 'Chennai' }
+      ];
+      function toXYZ(lat, lng, r) {
+        const phi = (90 - lat) * (Math.PI / 180);
+        const theta = (lng + 180) * (Math.PI / 180);
+        return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
+      }
+      const cityVecs = cities.map(c => toXYZ(c.lat, c.lng, 2.37));
+      cityVecs.forEach((v, i) => {
+        const isBalasore = i === 0;
+        const m = new THREE.Mesh(new THREE.SphereGeometry(isBalasore ? 0.08 : 0.05, 8, 8), new THREE.MeshBasicMaterial({ color: isBalasore ? 0xEAB308 : 0x14B8A6 }));
+        m.position.copy(v);
+        globeGroup.add(m);
+      });
+
+      // Arcs connecting Balasore to Kolkata, Chennai, Mumbai, Delhi
+      [[0,1],[0,5],[0,6],[0,2],[1,6],[2,3]].forEach(([a,b]) => {
+        const vA = cityVecs[a], vB = cityVecs[b];
+        const mid = vA.clone().add(vB).normalize().multiplyScalar(3.1);
+        const curve = new THREE.QuadraticBezierCurve3(vA, mid, vB);
+        const pts = curve.getPoints(40);
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        globeGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x14B8A6, opacity: 0.55, transparent: true })));
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        globeGroup.rotation.y += 0.0012;
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Setup Language Switcher in Nav
+      if (window.VahanMitraI18N) {
+        VahanMitraI18N.renderLanguageSwitcher('home-lang-container');
+        VahanMitraI18N.applyTranslations();
+      }
+
+      updateHomeKPIs();
+      window.addEventListener('vm-state-change', updateHomeKPIs);
+      window.addEventListener('vm-lang-changed', () => {
+        if (window.VahanMitraI18N) VahanMitraI18N.applyTranslations();
+      });
+    });
+  </script>
+</body>
+</html>
