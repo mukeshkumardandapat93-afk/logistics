@@ -121,7 +121,7 @@
     .btn-teal { background: linear-gradient(135deg, #0D5C68, #14B8A6); color: #fff; }
     .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: #fff; }
     
-    /* KPI ROW */
+    @media (max-width: 560px) { .auth-card{padding:22px 16px} .auth-mode-toggle{gap:4px} .auth-mode-btn{font-size:.76rem} #register-form .form-group > div{flex-direction:column} #register-form .form-group > div .btn{width:100%!important} }\n\n    /* KPI ROW */
     .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
     .kpi-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; position: relative; }
@@ -245,59 +245,48 @@
   </header>
 
   <main>
-    <!-- AUTH SECTION WITH AUTOMATED SMS OTP -->
+    <!-- AUTH SECTION: REGISTER / LOG IN -->
     <div id="auth-section" class="auth-section">
       <div class="auth-card">
         <div style="text-align:center; margin-bottom:24px;">
-          <h2 style="font-family:'Orbitron',monospace; font-size:1.45rem; color:#fff; margin-bottom:6px;">Captain Cockpit</h2>
-          <p style="font-size:0.85rem; color:var(--muted);">Heavy Vehicle Driver & Carrier Terminal</p>
+          <h2 style="font-family:'Orbitron',monospace; font-size:1.45rem; color:#fff; margin-bottom:6px;">VAHAN MITRA</h2>
+          <p style="font-size:0.85rem; color:var(--muted);">Create an account or log in</p>
         </div>
-
         <div class="auth-mode-toggle">
-          <button class="auth-mode-btn active" id="tab-cap-phone" onclick="setCapAuthMode('phone')">📱 Mobile & SMS OTP</button>
-          <button class="auth-mode-btn" id="tab-cap-email" onclick="setCapAuthMode('email')">✉ Driver Email</button>
+          <button class="auth-mode-btn active" id="auth-register-tab" type="button" onclick="showAuthForm('register')">📝 Register</button>
+          <button class="auth-mode-btn" id="auth-login-tab" type="button" onclick="showAuthForm('login')">🔐 Log In</button>
         </div>
 
-        <!-- Phone Number Login Form -->
-        <form id="cap-phone-form" onsubmit="handleCapPhoneLogin(event)">
-          <div class="form-group">
-            <label class="form-label">Driver Mobile Number (10 Digits)</label>
-            <div style="position:relative;">
-              <span style="position:absolute; left:14px; top:12px; color:var(--accent); font-weight:700; font-size:0.9rem;">+91</span>
-              <input type="tel" id="cap-phone" class="form-input" style="padding-left:52px;" placeholder="9811122334" maxlength="10" oninput="handleCapPhoneInput(this)" required>
-            </div>
-            <div style="font-size:0.74rem; color:var(--primary-bright); margin-top:6px;">
-              ⚡ <em>SMS OTP dispatches automatically when 10 digits are typed.</em>
-            </div>
-          </div>
-
-          <div class="form-group" id="cap-otp-group" style="display:none;">
-            <label class="form-label">Enter 4-Digit Driver OTP</label>
-            <input type="text" id="cap-otp-input" class="form-input" placeholder="Enter OTP received via SMS" maxlength="4" style="font-family:'Share Tech Mono', monospace; font-size:1.2rem; letter-spacing:4px; text-align:center;">
-          </div>
-
-          <button type="submit" class="btn btn-gold" style="margin-top:10px;">
-            <span>🔐</span> Verify & Enter Cockpit
-          </button>
+        <form id="register-form" onsubmit="submitRegistration(event)">
+          <div class="form-group"><label class="form-label" for="reg-name">Full Name</label><input id="reg-name" class="form-input" autocomplete="name" required maxlength="100" placeholder="Enter your full name"></div>
+          <div class="form-group"><label class="form-label" for="reg-dob">Date of Birth</label><input id="reg-dob" type="date" class="form-input" required></div>
+          <div class="form-group"><label class="form-label" for="reg-mobile">Mobile Number</label><div style="display:flex;gap:8px"><input id="reg-mobile" type="tel" class="form-input" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" placeholder="10-digit mobile number" required><button class="btn btn-ghost" type="button" style="width:auto;padding:8px 12px" onclick="sendDemoOtp('mobile')">Send OTP</button></div><small id="mobile-otp-note" style="color:var(--muted)">Mobile OTP verification</small></div>
+          <div class="form-group"><label class="form-label" for="reg-mobile-otp">Mobile OTP</label><input id="reg-mobile-otp" class="form-input" inputmode="numeric" maxlength="6" placeholder="Enter mobile OTP" required></div>
+          <div class="form-group"><label class="form-label" for="reg-email">Email ID</label><div style="display:flex;gap:8px"><input id="reg-email" type="email" class="form-input" autocomplete="email" placeholder="you@example.com" required><button class="btn btn-ghost" type="button" style="width:auto;padding:8px 12px" onclick="sendDemoOtp('email')">Send OTP</button></div><small id="email-otp-note" style="color:var(--muted)">Email OTP verification</small></div>
+          <div class="form-group"><label class="form-label" for="reg-email-otp">Email OTP</label><input id="reg-email-otp" class="form-input" inputmode="numeric" maxlength="6" placeholder="Enter email OTP" required></div>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:14px">OTP demo note: this standalone HTML cannot send real SMS/email OTPs. Connect a secure backend and OTP provider before using this for real registrations.</p>
+          <button type="submit" class="btn btn-gold">Continue to ₹200 Registration Fee</button>
         </form>
 
-        <!-- Email Login Form (Hidden by default) -->
-        <form id="cap-email-form" onsubmit="handleCapEmailLogin(event)" style="display:none;">
-          <div class="form-group">
-            <label class="form-label">Driver Registered Email</label>
-            <input type="email" id="cap-email" class="form-input" placeholder="captain@vahanmitra.in" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Driver PIN / Password</label>
-            <input type="password" id="cap-pass" class="form-input" placeholder="••••••••" required>
-          </div>
-          <button type="submit" class="btn btn-teal" style="margin-top:10px;">Enter Cockpit</button>
+        <form id="login-form" onsubmit="submitRegistrationLogin(event)" style="display:none">
+          <div class="form-group"><label class="form-label" for="login-email">Registered Email ID</label><input id="login-email" type="email" class="form-input" required placeholder="you@example.com"></div>
+          <div class="form-group"><label class="form-label" for="login-mobile">Registered Mobile Number</label><input id="login-mobile" type="tel" class="form-input" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" required placeholder="10-digit mobile number"></div>
+          <button type="submit" class="btn btn-teal">Log In / Check Registration Status</button>
         </form>
 
-        <div style="margin-top:20px; background:rgba(234,179,8,0.1); border:1px dashed var(--border-gold); border-radius:12px; padding:12px 16px; font-size:0.8rem; color:#CBD5E1; display:flex; justify-content:space-between; align-items:center;">
-          <div><strong>1-Click Captain Demo:</strong><br><span>Harpreet Singh (+91 9811122334)</span></div>
-          <button class="btn btn-gold" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="fillDemoCaptain()">Auto Fill</button>
+        <div id="registration-payment-panel" style="display:none;margin-top:22px">
+          <div style="border-top:1px solid var(--border);padding-top:18px">
+            <h3 style="font-family:'Orbitron',monospace;margin-bottom:8px">Registration Fee: ₹200</h3>
+            <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Scan the QR code to pay, then enter the UTR/reference number. Your request will remain pending until an admin reviews it.</p>
+            <div class="qr-container"><img id="register-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=upi%3A%2F%2Fpay%3Fpa%3Dm.dandpat%40ybl%26pn%3DVahan%2520Mitra%2520Logistics%26am%3D200%26cu%3DINR%26tn%3DRegistration%2520Fee" alt="₹200 registration UPI QR code"><div style="color:#07191D;text-align:center;font-weight:800;margin-top:8px">SCAN TO PAY ₹200</div></div>
+            <p style="text-align:center;margin:12px 0;color:var(--accent)">UPI ID: m.dandpat@ybl</p>
+            <div class="form-group"><label class="form-label" for="reg-utr">UPI UTR / Transaction Reference</label><input id="reg-utr" class="form-input" maxlength="30" required placeholder="Enter transaction reference number"></div>
+            <button type="button" class="btn btn-gold" onclick="submitRegistrationPayment()">Submit for Admin Review</button>
+          </div>
         </div>
+        <div id="registration-status-panel" style="display:none;margin-top:18px"></div>
+        <button type="button" class="btn btn-ghost" style="margin-top:18px" onclick="toggleAdminReview()">Admin Review Panel (Demo)</button>
+        <div id="admin-review-panel" style="display:none;margin-top:18px;text-align:left"></div>
       </div>
     </div>
 
@@ -601,21 +590,137 @@
     }
 
     function handleVerifyUpiPayment() {
-      const cap = VahanMitraDB.getCurrentCaptain();
-      if (!cap) return;
-      const utr = document.getElementById('cap-utr-input').value.trim();
-      if (utr.length < 6) {
-        alert('Please enter a valid 12-digit UPI Bank Reference / UTR Number.');
+      alert('Payment verification must be reviewed by an administrator. Please use the registration flow and submit your UTR for review.');
+    }
+
+    // Registration flow. OTPs are demo-only; production OTP delivery/verification requires a backend.
+    let pendingRegistrationDraft = null;
+    let demoOtps = {};
+    const REG_REQUESTS_KEY = 'vahanMitraRegistrationRequests';
+    const REG_USERS_KEY = 'vahanMitraRegisteredUsers';
+
+    function showAuthForm(mode) {
+      document.getElementById('register-form').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('login-form').style.display = mode === 'login' ? 'block' : 'none';
+      document.getElementById('auth-register-tab').classList.toggle('active', mode === 'register');
+      document.getElementById('auth-login-tab').classList.toggle('active', mode === 'login');
+      document.getElementById('registration-payment-panel').style.display = 'none';
+      document.getElementById('registration-status-panel').style.display = 'none';
+    }
+
+    function getStoredArray(key) {
+      try { const value = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(value) ? value : []; }
+      catch (_) { return []; }
+    }
+
+    function sendDemoOtp(type) {
+      const field = document.getElementById(type === 'mobile' ? 'reg-mobile' : 'reg-email');
+      const value = field.value.trim();
+      if (!value || (type === 'mobile' && !/^[6-9][0-9]{9}$/.test(value)) ||
+          (type === 'email' && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))) {
+        alert(type === 'mobile' ? 'Enter a valid 10-digit mobile number first.' : 'Enter a valid email address first.');
         return;
       }
+      // For local UI testing only. This does not send a real SMS or email.
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      demoOtps[type] = { value: otp, target: value, expires: Date.now() + 5 * 60 * 1000 };
+      const note = document.getElementById(type + '-otp-note');
+      note.textContent = 'Demo OTP generated: ' + otp + ' (not sent; valid for 5 minutes)';
+      note.style.color = 'var(--accent)';
+    }
 
-      const res = VahanMitraDB.confirmCaptainUpiPayment(cap.id, utr);
-      if (res.success) {
-        alert(`Payment of ₹200 to m.dandpat@ybl verified successfully! Your driver account is now officially verified and activated.`);
-        renderUpiRegistrationState(res.captain);
-      } else {
-        alert(res.msg);
+    function submitRegistration(event) {
+      event.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const dob = document.getElementById('reg-dob').value;
+      const mobile = document.getElementById('reg-mobile').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const mobileOtp = document.getElementById('reg-mobile-otp').value.trim();
+      const emailOtp = document.getElementById('reg-email-otp').value.trim();
+      if (!dob || new Date(dob) >= new Date()) { alert('Please enter a valid date of birth.'); return; }
+      if (!demoOtps.mobile || demoOtps.mobile.target !== mobile || demoOtps.mobile.value !== mobileOtp || Date.now() > demoOtps.mobile.expires) {
+        alert('Verify the mobile using the current demo OTP first.'); return;
       }
+      if (!demoOtps.email || demoOtps.email.target !== email || demoOtps.email.value !== emailOtp || Date.now() > demoOtps.email.expires) {
+        alert('Verify the email using the current demo OTP first.'); return;
+      }
+      const users = getStoredArray(REG_USERS_KEY);
+      if (users.some(u => u.email === email || u.mobile === mobile)) {
+        alert('This email or mobile number is already registered. Please log in.'); return;
+      }
+      pendingRegistrationDraft = { id: 'REG-' + Date.now(), name, dob, mobile, email, createdAt: new Date().toISOString() };
+      document.getElementById('registration-payment-panel').style.display = 'block';
+      document.getElementById('registration-payment-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    function submitRegistrationPayment() {
+      if (!pendingRegistrationDraft) { alert('Please complete registration details and OTP checks first.'); return; }
+      const utr = document.getElementById('reg-utr').value.trim();
+      if (utr.length < 6) { alert('Enter a valid UTR/reference number (at least 6 characters).'); return; }
+      const requests = getStoredArray(REG_REQUESTS_KEY);
+      if (requests.some(r => r.utr.toLowerCase() === utr.toLowerCase())) {
+        alert('This UTR has already been submitted.'); return;
+      }
+      const request = {...pendingRegistrationDraft, utr, fee:200, paymentStatus:'pending_review', registrationStatus:'pending_review', submittedAt:new Date().toISOString()};
+      requests.push(request);
+      localStorage.setItem(REG_REQUESTS_KEY, JSON.stringify(requests));
+      const users = getStoredArray(REG_USERS_KEY);
+      users.push({...pendingRegistrationDraft, registrationStatus:'pending_review', requestId:request.id});
+      localStorage.setItem(REG_USERS_KEY, JSON.stringify(users));
+      pendingRegistrationDraft = null;
+      document.getElementById('registration-payment-panel').style.display = 'none';
+      const panel = document.getElementById('registration-status-panel');
+      panel.style.display = 'block';
+      panel.innerHTML = '<div style="padding:16px;border:1px solid var(--accent);border-radius:12px;background:rgba(234,179,8,.1)"><h3 style="color:var(--accent);margin-bottom:8px">⏳ Pending Review</h3><p>Your ₹200 payment reference has been submitted. An administrator must verify the payment and approve the registration before account activation.</p><p style="margin-top:8px;color:var(--muted)">Request ID: ' + escapeRegText(request.id) + '</p></div>';
+      document.getElementById('register-form').reset();
+      demoOtps = {};
+    }
+
+    function submitRegistrationLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const mobile = document.getElementById('login-mobile').value.trim();
+      const user = getStoredArray(REG_USERS_KEY).find(u => u.email === email && u.mobile === mobile);
+      const panel = document.getElementById('registration-status-panel');
+      panel.style.display = 'block';
+      if (!user) {
+        panel.innerHTML = '<div style="padding:14px;border:1px solid var(--danger);border-radius:12px">No matching registration found. Please register first.</div>';
+      } else {
+        const approved = user.registrationStatus === 'approved';
+        panel.innerHTML = '<div style="padding:14px;border:1px solid ' + (approved ? 'var(--success)' : 'var(--accent)') + ';border-radius:12px"><h3>' + (approved ? 'Registration Approved' : '⏳ Pending Review') + '</h3><p style="margin-top:6px">' + (approved ? 'Your registration has been approved.' : 'Your request is awaiting admin review. You cannot access the captain terminal until approval.') + '</p><p style="margin-top:6px">Name: ' + escapeRegText(user.name) + '</p></div>';
+      }
+    }
+
+    function escapeRegText(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function toggleAdminReview() {
+      const panel = document.getElementById('admin-review-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      if (panel.style.display === 'block') renderAdminReviewRequests();
+    }
+
+    function renderAdminReviewRequests() {
+      const panel = document.getElementById('admin-review-panel');
+      const requests = getStoredArray(REG_REQUESTS_KEY);
+      if (!requests.length) { panel.innerHTML = '<p style="color:var(--muted)">No registration requests submitted on this browser yet.</p>'; return; }
+      panel.innerHTML = '<h3 style="margin-bottom:12px">Registration Requests</h3>' + requests.map(r => '<div style="padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px"><strong>' + escapeRegText(r.name) + '</strong><div style="font-size:.82rem;color:var(--muted);margin:5px 0">DOB: ' + escapeRegText(r.dob) + ' · Mobile: ' + escapeRegText(r.mobile) + ' · Email: ' + escapeRegText(r.email) + '</div><div>Fee: ₹200 · UTR: ' + escapeRegText(r.utr) + '</div><div style="color:var(--accent);margin:6px 0">Status: ' + escapeRegText(r.registrationStatus) + '</div><button type="button" class="btn btn-teal" style="margin-top:6px" onclick="reviewRegistrationRequest(\'' + escapeRegText(r.id) + '\',\'approved\')">Approve</button> <button type="button" class="btn btn-ghost" style="margin-top:6px" onclick="reviewRegistrationRequest(\'' + escapeRegText(r.id) + '\',\'rejected\')">Reject</button></div>').join('');
+    }
+
+    function reviewRegistrationRequest(id, status) {
+      const requests = getStoredArray(REG_REQUESTS_KEY);
+      const request = requests.find(r => r.id === id);
+      if (!request) return;
+      request.registrationStatus = status;
+      request.paymentStatus = status === 'approved' ? 'verified' : 'rejected';
+      request.reviewedAt = new Date().toISOString();
+      localStorage.setItem(REG_REQUESTS_KEY, JSON.stringify(requests));
+      const users = getStoredArray(REG_USERS_KEY);
+      const user = users.find(u => u.requestId === id);
+      if (user) user.registrationStatus = status;
+      localStorage.setItem(REG_USERS_KEY, JSON.stringify(users));
+      renderAdminReviewRequests();
     }
 
     function updateDutyButton(isOnline) {
