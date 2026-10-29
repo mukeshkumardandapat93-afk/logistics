@@ -1,0 +1,9 @@
+{
+  "name": "vahanmitra-logistics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VahanMitra static logistics website",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}
